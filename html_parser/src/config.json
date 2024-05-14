@@ -1,0 +1,21 @@
+{
+  "main_html": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/html_pages/test.html",
+  "fragments": [
+    {
+      "name": "about",
+      "path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/elements/about.html"
+    },
+    {
+      "name": "job",
+      "path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/elements/job.html"
+    },
+    {
+      "name": "subtitle",
+      "path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/elements/subtitle.html"
+    },
+    {
+      "name": "job_list",
+      "path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/elements/job_list.html"
+    }
+  ]
+}
