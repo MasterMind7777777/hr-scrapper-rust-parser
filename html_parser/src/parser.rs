@@ -5,7 +5,7 @@ use log::info;
 use scraper::{ElementRef, Html, Selector};
 
 pub fn initialize_logging() {
-    let config_path = "log4rs.yaml";
+    let config_path = "src/log4rs.yaml";
     if Path::new(config_path).exists() {
         log4rs::init_file(config_path, Default::default()).unwrap_or_else(|err| {
             eprintln!("Failed to initialize logging: {}", err);
@@ -20,10 +20,14 @@ pub fn extract_text_from_html(html: &str) -> String {
         .root_element()
         .first_child()
         .and_then(ElementRef::wrap)
-        .map(|elem| elem.text().collect::<Vec<_>>().join(" ").replace(['\n', '\t', ' '], ""))
+        .map(|elem| {
+            elem.text()
+                .collect::<Vec<_>>()
+                .join(" ")
+                .replace(['\n', '\t', ' '], "")
+        })
         .unwrap_or_default()
 }
-
 
 pub fn normalize_class_attribute(value: &str) -> String {
     let mut classes: Vec<&str> = value.split_whitespace().collect();
@@ -54,7 +58,6 @@ pub fn generate_selector_from_html(html: &str) -> Result<Selector, String> {
         })
 }
 
-
 pub fn check_full_path_uniqueness(document: &Html, path: &[(String, Vec<String>)]) -> usize {
     let path_string = path
         .iter()
@@ -72,7 +75,10 @@ pub fn check_full_path_uniqueness(document: &Html, path: &[(String, Vec<String>)
 
     let selector = Selector::parse(&path_string).expect("Failed to parse selector for path");
     let matches = document.select(&selector).count();
-    info!("Path '{}' occurs {} times in the document.", path_string, matches);
+    info!(
+        "Path '{}' occurs {} times in the document.",
+        path_string, matches
+    );
     matches
 }
 
@@ -97,14 +103,16 @@ pub fn fetch_tag_and_classes(element: &ElementRef) -> (String, Vec<String>) {
     (tag_name, class_list)
 }
 
-
 #[derive(Debug)]
 pub struct SelectorResult {
     pub path: String,
     pub matches: usize,
 }
 
-pub fn find_unique_selectors_in_document(document: &Html, element: ElementRef) -> Vec<SelectorResult> {
+pub fn find_unique_selectors_in_document(
+    document: &Html,
+    element: ElementRef,
+) -> Vec<SelectorResult> {
     let mut unique_selectors = Vec::new();
     let mut current_element = Some(element);
     let mut path = Vec::new();
@@ -117,7 +125,8 @@ pub fn find_unique_selectors_in_document(document: &Html, element: ElementRef) -
             path.push((tag_name.clone(), class_combo.clone()));
             let matches = check_full_path_uniqueness(document, &path);
 
-            let selector_string = path.iter()
+            let selector_string = path
+                .iter()
                 .rev()
                 .map(|(tag, classes)| {
                     let mut class_string = String::new();

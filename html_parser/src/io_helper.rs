@@ -1,54 +1,64 @@
-use log::info;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fs;
 
-use crate::parser::SelectorResult;
-
+// Input structure
 #[derive(Deserialize)]
-pub struct Config {
-    pub main_html: String,
-    pub fragments: Vec<FragmentConfig>,
+pub struct InputConfig {
+    pub url: String,
+    pub full_html_path: String,
+    pub fragments: Vec<InputFragment>,
 }
 
 #[derive(Deserialize)]
-pub struct FragmentConfig {
+pub struct InputFragment {
     pub name: String,
     pub path: String,
 }
 
+// Output structure
 #[derive(Serialize)]
-pub struct Output {
-    pub results: HashMap<String, HashMap<String, Vec<String>>>,
+pub struct OutputConfig {
+    pub url: String,
+    pub full_html: String,
+    pub fragments: Vec<OutputFragment>,
 }
 
-pub fn load_config(path: &str) -> Result<Config, std::io::Error> {
+#[derive(Serialize)]
+pub struct OutputFragment {
+    pub name: String,
+    pub html: String,
+}
+
+// Function to load input configurations and generate output
+pub fn load_and_process_config(path: &str) -> Result<Vec<OutputConfig>, std::io::Error> {
     let config_data = fs::read_to_string(path)?;
-    let config: Config = serde_json::from_str(&config_data)?;
-    Ok(config)
-}
+    let input_configs: Vec<InputConfig> = serde_json::from_str(&config_data)?;
 
-pub fn save_output(path: &str, output: &Output) -> Result<(), std::io::Error> {
-    let output_data = serde_json::to_string_pretty(output)?;
-    fs::write(path, output_data)
-}
+    let mut output_configs = Vec::new();
 
-pub fn process_fragments(config: &Config, find_unique_selectors: fn(&str, &str) -> Vec<SelectorResult>) -> Output {
-    let mut results = HashMap::new();
+    for input_config in input_configs {
+        let full_html = fs::read_to_string(&input_config.full_html_path)?;
 
-    let main_html_content = fs::read_to_string(&config.main_html).expect("Error reading main HTML file");
-    info!("Main HTML content loaded successfully");
+        let mut fragments = Vec::new();
 
-    for fragment in &config.fragments {
-        let target_html_content = fs::read_to_string(&fragment.path).expect("Error reading fragment HTML file");
-        info!("Target HTML content '{}' loaded successfully", fragment.name);
+        for fragment in input_config.fragments {
+            let html = fs::read_to_string(&fragment.path)?;
+            let output_fragment = OutputFragment {
+                name: fragment.name,
+                html,
+            };
+            fragments.push(output_fragment);
+        }
 
-        let selectors = find_unique_selectors(&main_html_content, &target_html_content);
-        let selectors_map: HashMap<String, Vec<String>> = selectors.into_iter().map(|s| (s.path, vec![s.matches.to_string()])).collect();
+        let output_config = OutputConfig {
+            url: input_config.url,
+            full_html,
+            fragments,
+        };
 
-        results.insert(fragment.name.clone(), selectors_map);
+        output_configs.push(output_config);
     }
 
-    Output { results }
+    Ok(output_configs)
 }
 

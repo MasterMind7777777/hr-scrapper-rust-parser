@@ -1,5 +1,6 @@
-{
-  "main_html": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/html_pages/test.html",
+[{
+  "url": "https://www.linkedin.com/in/james-mahy/",
+  "full_html_path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/html_pages/test.html",
   "fragments": [
     {
       "name": "about",
@@ -18,4 +19,4 @@
       "path": "/home/mastermind/projects/WBT/hr-scrapper-rust-parser/html_parser/src/elements/job_list.html"
     }
   ]
-}
+}]

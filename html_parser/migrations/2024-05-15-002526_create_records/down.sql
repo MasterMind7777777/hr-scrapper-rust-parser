@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS element_selector;
+DROP TABLE IF EXISTS selectors;
+DROP TABLE IF EXISTS elements;
+DROP TABLE IF EXISTS pages;

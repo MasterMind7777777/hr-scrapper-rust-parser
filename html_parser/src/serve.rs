@@ -9,7 +9,7 @@ fn main() {
 
     for request in server.incoming_requests() {
         // Define the path to the HTML file
-        let file_path = Path::new("html_pages/test.html");
+        let file_path = Path::new("src/html_pages/test.html");
 
         // Check if the file exists and read its content
         if file_path.exists() {
