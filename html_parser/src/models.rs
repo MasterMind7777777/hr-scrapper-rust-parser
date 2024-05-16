@@ -11,12 +11,12 @@ pub struct Page {
     pub name: String,
     pub url: String,
     pub html: String,
+    pub created_at: Option<NaiveDateTime>,
     pub html_hash: String,
-    pub created_at: NaiveDateTime,
 }
 
 #[derive(Insertable)]
-#[table_name = "pages"]
+#[diesel(table_name = pages)]
 pub struct NewPage {
     pub name: String,
     pub url: String,
@@ -32,7 +32,7 @@ pub struct Element {
     pub page_id: Uuid,
     pub name: String,
     pub html: String,
-    pub created_at: NaiveDateTime,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -48,7 +48,7 @@ pub struct NewElement<'a> {
 pub struct Selector {
     pub id: Uuid,
     pub path: String,
-    pub created_at: NaiveDateTime,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -66,7 +66,7 @@ pub struct ElementSelector {
     pub element_id: Uuid,
     pub selector_id: Uuid,
     pub matches: i32,
-    pub created_at: NaiveDateTime,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -76,3 +76,4 @@ pub struct NewElementSelector {
     pub selector_id: Uuid,
     pub matches: i32,
 }
+

@@ -22,6 +22,51 @@ pub fn insert_page(conn: &mut PgConnection, new_page: NewPage) -> QueryResult<Uu
         .get_result(conn)
 }
 
+pub fn update_page(
+    conn: &mut PgConnection,
+    page_name: &str,
+    new_url: String,
+    new_html: String,
+    new_html_hash: String,
+) -> QueryResult<usize> {
+    use crate::schema::pages::dsl::*;
+    diesel::update(pages.filter(name.eq(page_name)))
+        .set((
+            url.eq(new_url),
+            html.eq(new_html),
+            html_hash.eq(new_html_hash),
+        ))
+        .execute(conn)
+}
+
+pub fn try_insert_page(
+    conn: &mut diesel::PgConnection,
+    name: &str,
+    url: &str,
+    html: &str,
+    html_hash: &str,
+) -> Result<uuid::Uuid, diesel::result::Error> {
+    insert_page(
+        conn,
+        NewPage {
+            name: name.to_string(),
+            url: url.to_string(),
+            html: html.to_string(),
+            html_hash: html_hash.to_string(),
+        },
+    )
+}
+
+pub fn get_page_id_by_name(conn: &mut diesel::PgConnection, page_name: &str) -> Result<uuid::Uuid, diesel::result::Error> {
+    use crate::schema::pages::dsl::*;
+    pages.filter(name.eq(page_name)).select(id).first(conn)
+}
+
+pub fn is_hash_matching(conn: &mut diesel::PgConnection, page_id: uuid::Uuid, hash: &str) -> bool {
+    use crate::schema::pages::dsl::*;
+    pages.filter(id.eq(page_id)).select(html_hash).first::<String>(conn).map_or(false, |db_hash| db_hash == hash)
+}
+
 pub fn insert_element(conn: &mut PgConnection, new_element: NewElement) -> QueryResult<Uuid> {
     use crate::schema::elements::dsl::*;
     diesel::insert_into(elements)
@@ -49,12 +94,3 @@ pub fn insert_element_selector(
         .get_result(conn)
 }
 
-pub fn check_page_html_hash_exist(conn: &PgConnection, html_hash: &str) -> bool {
-    use crate::schema::pages::dsl::*;
-
-    let result = pages.filter(html_hash.eq(html_hash)).first::<NewPage>(conn);
-    match result {
-        Ok(_) => true,  // Hash exists
-        Err(_) => false, // Hash does not exist
-    }
-}
